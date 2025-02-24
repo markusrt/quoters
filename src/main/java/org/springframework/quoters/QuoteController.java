@@ -36,7 +36,7 @@ public class QuoteController {
 		this.repository = repository;
 	}
 
-	@GetMapping("/api")
+	@GetMapping({"/api", "/api/"})
 	public List<QuoteResource> getAll() {
 
 		return repository.findAll().stream()
@@ -44,7 +44,7 @@ public class QuoteController {
 			.collect(Collectors.toList());
 	}
 
-	@GetMapping("/api/{id}")
+	@GetMapping({"/api/{id}", "/api/{id}/"})
 	public QuoteResource getOne(@PathVariable Long id) {
 
 		return repository.findById(id)
@@ -52,7 +52,7 @@ public class QuoteController {
 			.orElse(new QuoteResource(NONE, "Quote " + id + " does not exist"));
 	}
 
-	@GetMapping("/api/random")
+	@GetMapping({"/api/random", "/api/random/"})
 	public QuoteResource getRandomOne() {
 		return getOne(nextLong(1, repository.count() + 1));
 	}
