@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: master
+        #with:
+        #  ref: master
       - name: Determine Maven command
         run: |
           mvn_command="mvn"
@@ -49,6 +49,7 @@ jobs:
       - name: Compile prior to upgrade
         run: $mvn_command -q compile
       - name: Upgrade loop
+        continue-on-error: true
         env:
           GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -57,22 +58,6 @@ jobs:
           /tmp/advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
           /tmp/advisor upgrade-plan apply --after-upgrade-cmd=compile --push --url=${{ env.SERVER_URL }} --token=${{ secrets.GITHUB_TOKEN }}
       - name: Get errors if exist
-        if: always()
+        if: hashFiles('.advisor/errors/') != ''
         run: |
-          cat .advisor/errors/*
-      - name: Create branch for changes
-        if: false
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git config set advice.addIgnoredFile false
-          git checkout -b "app-advisor/upgrade"
-          git add *
-          git commit -m "Upgrade step"
-          git push --set-upstream origin "app-advisor/upgrade"
-      - name: Create pull request
-        if: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr create --title "App-Advisor Upgrade"
-        
+          cat .advisor/errors/*.log
