@@ -9,7 +9,7 @@ on:
 env:
   ADVISOR_VERSION: 1.1.2
   SERVER_PORT: 9003
-  SERVER_URI: http://localhost:9003
+  SERVER_URL: http://localhost:9003
 
 jobs:
   analyse:
@@ -33,7 +33,7 @@ jobs:
           tail -n 3 advisor-server.log 
       - name: Check server status
         run: |
-          curl "${{ env.SERVER_URI }}/actuator/health"
+          curl "${{ env.SERVER_URL }}/actuator/health"
       - name: Download CLI
         run: |
           curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_VERSION }}.tar
@@ -42,3 +42,9 @@ jobs:
           chmod +x advisor
       - name: Compile prior to upgrade
         run: $mvn_command compile
+      - name: Upgrade loop
+        run: |
+          ./advisor build-config get
+          ./advisor build-config publish --url=${{ env.SERVER_URL }}
+          ./advisor upgrade-plan get --url=${{ env.SERVER_URL }}
+          ./advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
