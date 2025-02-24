@@ -53,7 +53,9 @@ jobs:
           /tmp/advisor build-config get
           /tmp/advisor upgrade-plan get --url=${{ env.SERVER_URL }}
           /tmp/advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
+          /tmp/advisor upgrade-plan apply --after-upgrade-cmd=compile --push --url=${{ env.SERVER_URL }} --token=${{ secrets.GITHUB_TOKEN }}
       - name: Create branch for changes
+        if: false
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -63,6 +65,7 @@ jobs:
           git commit -m "Upgrade step"
           git push --set-upstream origin "app-advisor/upgrade"
       - name: Create pull request
+        if: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr create --title "App-Advisor Upgrade"
