@@ -54,6 +54,10 @@ jobs:
           /tmp/advisor upgrade-plan get --url=${{ env.SERVER_URL }}
           /tmp/advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
           /tmp/advisor upgrade-plan apply --after-upgrade-cmd=compile --push --url=${{ env.SERVER_URL }} --token=${{ secrets.GITHUB_TOKEN }}
+      - name: Get errors if exist
+        if: ${{ hashFiles('.advisor/errors/') != '' }}
+        run: |
+          cat .advisor/errors/*
       - name: Create branch for changes
         if: false
         run: |
