@@ -1,0 +1,65 @@
+name: App Advisor
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 2 * * 1-5"
+  pull_request:
+    paths:
+      - .github/workflows/app-advisor.yml
+    branches:
+    - master
+
+env:
+  ADVISOR_VERSION: 1.1.2
+  SERVER_PORT: 9003
+  SERVER_URL: http://localhost:9003
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Determine Maven command
+        run: |
+          mvn_command="mvn"
+          if [ -f mvnw ]; then
+            mvn_command="./mvnw"
+          fi
+          echo "Maven command detected as '$mvn_command'"
+          echo "mvn_command=$mvn_command" >> "$GITHUB_ENV"
+      - name: Start server
+        run: |
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/spring-server.jar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/tanzu-spring-server/${{ env.ADVISOR_VERSION }}/tanzu-spring-server-${{ env.ADVISOR_VERSION }}.jar
+          java -jar -Dserver.port=${{ env.SERVER_PORT }} /tmp/spring-server.jar > /tmp/advisor-server.log 2>&1 &
+          sleep 10
+          echo "Printing the last lines of the log file:"
+          tail -n 3 /tmp/advisor-server.log 
+      - name: Check server status
+        run: |
+          curl "${{ env.SERVER_URL }}/actuator/health"
+      - name: Download CLI
+        run: |
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_VERSION }}.tar
+          tar -xf /tmp/advisor-cli.tar --strip-components=1 --exclude=./META-INF -C /tmp
+          chmod +x /tmp/advisor
+      - name: Generates Maven Settings
+        uses: 's4u/maven-settings-action@v3.0.0'
+        with:
+          servers: '[{"id": "tanzu-spring-release", "username":  "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}]'
+          repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
+      - name: Compile prior to upgrade
+        run: $mvn_command -q compile
+      - name: Upgrade loop
+        continue-on-error: true
+        run: |
+          /tmp/advisor build-config get
+          /tmp/advisor build-config publish --url=${{ env.SERVER_URL }}
+          /tmp/advisor upgrade-plan apply --after-upgrade-cmd=compile --push --url=${{ env.SERVER_URL }} --token=${{ secrets.GITHUB_TOKEN }}
+      - name: Show upgrade errors if exist
+        if: hashFiles('.advisor/errors/') != ''
+        run: |
+          cat .advisor/errors/*.log
