@@ -2,7 +2,11 @@ name: App Advisor
 
 on:
   workflow_dispatch:
+  schedule:
+  - cron: "0 2 * * 1-5"
   pull_request:
+    paths:
+      - .github/workflows/app-advisor.yml
     branches:
     - master
 
@@ -51,13 +55,11 @@ jobs:
         run: $mvn_command -q compile
       - name: Upgrade loop
         continue-on-error: true
-        env:
-          GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
           /tmp/advisor build-config get
           /tmp/advisor build-config publish --url=${{ env.SERVER_URL }}
           /tmp/advisor upgrade-plan apply --after-upgrade-cmd=compile --push --url=${{ env.SERVER_URL }} --token=${{ secrets.GITHUB_TOKEN }}
-      - name: Get errors if exist
+      - name: Show upgrade errors if exist
         if: hashFiles('.advisor/errors/') != ''
         run: |
           cat .advisor/errors/*.log
