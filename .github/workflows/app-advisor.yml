@@ -84,9 +84,9 @@ jobs:
         env:
           GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./advisor build-config get
-          ./advisor upgrade-plan get --url=${{ env.SERVER_URL }}
-          ./advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
+          /tmp/advisor build-config get
+          /tmp/advisor upgrade-plan get --url=${{ env.SERVER_URL }}
+          /tmp/advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
       - name: Create branch for changes
         run: |
           git config user.name github-actions
