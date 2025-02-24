@@ -22,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: java-to-11
       - name: Determine Maven command
         run: |
           mvn_command="mvn"
