@@ -1,4 +1,4 @@
-name: App Advisor Upgrade
+name: Application Advisor Upgrade
 
 on:
   workflow_dispatch:
