@@ -9,7 +9,7 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   SERVER_PORT: 9003
-  SERVER_URI: http://localhost:${{ env.SERVER_PORT }}
+  SERVER_URI: http://localhost:9003
 
 jobs:
   analyse:
