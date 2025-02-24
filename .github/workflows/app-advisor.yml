@@ -80,9 +80,12 @@ jobs:
           </settings>
           EOF
       - name: Compile prior to upgrade
-        run: $mvn_command compile
+        run: $mvn_command -q compile
       - name: Upgrade loop
+        env:
+          GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./advisor build-config get
           ./advisor upgrade-plan get --url=${{ env.SERVER_URL }}
-          ./advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
+          ./advisor upgrade-plan apply --push --url=${{ env.SERVER_URL }}
+        
