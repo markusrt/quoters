@@ -53,7 +53,7 @@ jobs:
           repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
           pluginRepositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
       - name: Compile code prior to upgrade
-        run: $mvn_command -q compile 
+        run: $mvn_command -q compile
       - name: Apply next Application Advisor upgrade step
         continue-on-error: true
         run: |
