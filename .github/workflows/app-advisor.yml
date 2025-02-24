@@ -26,8 +26,8 @@ jobs:
           echo "mvn_command=$mvn_command" >> "$GITHUB_ENV"
       - name: Start server
         run: |
-          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o spring-server.jar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/tanzu-spring-server/${{ env.ADVISOR_VERSION }}/tanzu-spring-server-${{ env.ADVISOR_VERSION }}.jar
-          java -jar -Dserver.port=${{ env.SERVER_PORT }} spring-server.jar > advisor-server.log 2>&1 &
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/spring-server.jar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/tanzu-spring-server/${{ env.ADVISOR_VERSION }}/tanzu-spring-server-${{ env.ADVISOR_VERSION }}.jar
+          java -jar -Dserver.port=${{ env.SERVER_PORT }} /tmp/spring-server.jar > /tmp/advisor-server.log 2>&1 &
           sleep 10
           echo "Printing the last 5 lines of the log file:"
           tail -n 3 advisor-server.log 
@@ -36,10 +36,9 @@ jobs:
           curl "${{ env.SERVER_URL }}/actuator/health"
       - name: Download CLI
         run: |
-          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_VERSION }}.tar
-          tar -xf advisor-cli.tar --strip-components=1 --exclude=./META-INF
-          rm advisor-cli.tar
-          chmod +x advisor
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_VERSION }}.tar
+          tar -xf /tmp/advisor-cli.tar --strip-components=1 --exclude=./META-INF
+          chmod +x /tmp/advisor
       - name: Create or edit Maven settings.xml
         run: |
           mkdir -p ~/.m2
@@ -87,5 +86,17 @@ jobs:
         run: |
           ./advisor build-config get
           ./advisor upgrade-plan get --url=${{ env.SERVER_URL }}
-          ./advisor upgrade-plan apply --push --url=${{ env.SERVER_URL }}
+          ./advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
+      - name: Create branch for changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout -b "app-advisor/upgrade"
+          git add *
+          git commit -m "Upgrade step"
+          git push --set-upstream origin "app-advisor/upgrade"
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr create --title "App-Advisor Upgrade"
         
