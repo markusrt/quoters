@@ -47,12 +47,13 @@ jobs:
           tar -xf /tmp/advisor-cli.tar --strip-components=1 --exclude=./META-INF -C /tmp
           chmod +x /tmp/advisor
       - name: Generate Maven settings
-        uses: 's4u/maven-settings-action@v3.0.0'
+        uses: 's4u/maven-settings-action@v3.1.0'
         with:
           servers: '[{"id": "tanzu-spring-release", "username":  "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}]'
           repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
+          pluginRepositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
       - name: Compile code prior to upgrade
-        run: mvn -q compile 
+        run: $mvn_command -q compile 
       - name: Apply next Application Advisor upgrade step
         continue-on-error: true
         run: |
