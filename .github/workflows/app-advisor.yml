@@ -24,7 +24,8 @@ jobs:
           mvn_command="mvn"
           if [ -f mvnw ]; then
             mvn_command="./mvnw"
-          fi        
+          fi
+          echo "Maven command detected as '$mvn_command'"
           echo "mvn_command=$mvn_command" >> "$GITHUB_ENV"
       - name: Start server
         run: |
@@ -60,4 +61,6 @@ jobs:
       - name: Get errors if exist
         if: hashFiles('.advisor/errors/') != ''
         run: |
+          ls -l .advisor/errors
+          echo "----"
           cat .advisor/errors/*.log
