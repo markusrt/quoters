@@ -52,7 +52,7 @@ jobs:
           servers: '[{"id": "tanzu-spring-release", "username":  "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}]'
           repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
       - name: Compile code prior to upgrade
-        run: $mvn_command -q compile
+        run: $mvn_command -q -s ~/.m2/settings.xml compile 
       - name: Apply next Application Advisor upgrade step
         continue-on-error: true
         run: |
