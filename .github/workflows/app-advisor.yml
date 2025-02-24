@@ -40,6 +40,45 @@ jobs:
           tar -xf advisor-cli.tar --strip-components=1 --exclude=./META-INF
           rm advisor-cli.tar
           chmod +x advisor
+      - name: Create or edit Maven settings.xml
+        run: |
+          mkdir -p ~/.m2
+          cat <<EOF > ~/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>spring-enterprise-subscription</id>
+                <username>${{ secrets.ARTIFACTORY_USER }}</username>
+                <password>${{ secrets.ARTIFACTORY_TOKEN }}</password>
+              </server>
+            </servers>
+            <profiles>
+              <profile>
+                <id>spring-enterprise</id>
+                <activation>
+                  <activeByDefault>true</activeByDefault>
+                </activation>
+                <repositories>
+                  <repository>
+                    <id>spring-enterprise-subscription</id>
+                    <url>https://packages.broadcom.com/artifactory/spring-enterprise</url>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>spring-enterprise-subscription</id>
+                    <url>https://packages.broadcom.com/artifactory/spring-enterprise</url>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>spring-enterprise</activeProfile>
+            </activeProfiles>
+            <mirrors/>
+          </settings>
+          EOF
       - name: Compile prior to upgrade
         run: $mvn_command compile
       - name: Upgrade loop
