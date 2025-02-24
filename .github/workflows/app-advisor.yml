@@ -48,7 +48,7 @@ jobs:
           servers: '[{"id": "tanzu-spring-release", "username":  "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}]'
           repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
       - name: Compile prior to upgrade
-        run: $mvn_command -q compile1
+        run: $mvn_command -q compile
       - name: Upgrade loop
         continue-on-error: true
         env:
