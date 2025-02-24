@@ -50,7 +50,7 @@ jobs:
       - name: Compile prior to upgrade
         run: $mvn_command -q compile
       - name: Upgrade loop
-        continue-on-error: true
+        #continue-on-error: true
         env:
           GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -61,6 +61,4 @@ jobs:
       - name: Get errors if exist
         if: hashFiles('.advisor/errors/') != ''
         run: |
-          ls -l .advisor/errors
-          echo "----"
           cat .advisor/errors/*.log
