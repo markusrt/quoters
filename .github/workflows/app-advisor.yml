@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        #with:
-        #  ref: master
+        with:
+          ref: master
       - name: Determine Maven command
         run: |
           mvn_command="mvn"
@@ -48,9 +48,9 @@ jobs:
           servers: '[{"id": "tanzu-spring-release", "username":  "${{ secrets.ARTIFACTORY_USER }}", "password": "${{ secrets.ARTIFACTORY_TOKEN }}"}]'
           repositories: '[{"id":"tanzu-spring-release", "name":"Spring Enterprise Supported Releases","url":"https://packages.broadcom.com/artifactory/spring-enterprise","snapshots":{"enabled":false}}]'
       - name: Compile prior to upgrade
-        run: $mvn_command -q compile
+        run: $mvn_command -q compile1
       - name: Upgrade loop
-        #continue-on-error: true
+        continue-on-error: true
         env:
           GIT_TOKEN_FOR_PRS: ${{ secrets.GITHUB_TOKEN }}
         run: |
