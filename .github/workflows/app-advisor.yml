@@ -45,6 +45,5 @@ jobs:
       - name: Upgrade loop
         run: |
           ./advisor build-config get
-          ./advisor build-config publish --url=${{ env.SERVER_URL }}
           ./advisor upgrade-plan get --url=${{ env.SERVER_URL }}
           ./advisor upgrade-plan apply --url=${{ env.SERVER_URL }}
