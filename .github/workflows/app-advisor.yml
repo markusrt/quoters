@@ -22,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: java-to-11
+          ref: ${{ github.event_name == 'pull_request' && 'master' || github.ref_name }}
       - name: Determine Maven command
         run: |
           mvn_command="mvn"
