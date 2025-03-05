@@ -11,7 +11,8 @@ on:
     - master
 
 env:
-  ADVISOR_VERSION: 1.1.3
+  ADVISOR_SERVER_VERSION: 1.1.2
+  ADVISOR_CLI_VERSION: 1.1.3
   SERVER_PORT: 9003
   SERVER_URL: http://localhost:9003
 
@@ -33,7 +34,7 @@ jobs:
           echo "mvn_command=$mvn_command" >> "$GITHUB_ENV"
       - name: Start Application Advisor server
         run: |
-          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/spring-server.jar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/tanzu-spring-server/${{ env.ADVISOR_VERSION }}/tanzu-spring-server-${{ env.ADVISOR_VERSION }}.jar
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/spring-server.jar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/tanzu-spring-server/${{ env.ADVISOR_SERVER_VERSION }}/tanzu-spring-server-${{ env.ADVISOR_SERVER_VERSION }}.jar
           java -jar -Dserver.port=${{ env.SERVER_PORT }} /tmp/spring-server.jar > /tmp/advisor-server.log 2>&1 &
           sleep 10
           echo "Printing the last lines of the log file:"
@@ -43,7 +44,7 @@ jobs:
           curl "${{ env.SERVER_URL }}/actuator/health"
       - name: Download Application Advisor CLI
         run: |
-          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_VERSION }}.tar
+          curl -L -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_TOKEN }}" -o /tmp/advisor-cli.tar -X GET https://packages.broadcom.com/artifactory/spring-enterprise/com/vmware/tanzu/spring/application-advisor-cli-linux/${{ env.ADVISOR_CLI_VERSION }}/application-advisor-cli-linux-${{ env.ADVISOR_CLI_VERSION }}.tar
           tar -xf /tmp/advisor-cli.tar --strip-components=1 --exclude=./META-INF -C /tmp
           chmod +x /tmp/advisor
       - name: Generate Maven settings
